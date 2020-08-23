@@ -2,12 +2,12 @@ body{
     background-color: rgb(26.01,28.05,27.03);
 }
 
-h1, p, label{
+h1, h3,  p, label{
     color: rgb(215.985,218.025,222.105);
     font-weight: bold;
     font-style: italic;
 }
-h1, p{
+h1, h3, p{
     text-align: center;
 }
 div{
@@ -19,7 +19,7 @@ label{
     display: block;
 	text-align: center;
 }
-input{
+input, select{
     display: block;
     margin-left: auto;
     margin-right: auto;

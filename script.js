@@ -1,8 +1,11 @@
 let inputs = [];
+let totals=[];
 let remainingMoney=0;
-function submit(){
+let totalRemainingMoney=0;
+
+function submit(inp){
   let valid_responses=true;
-  let val = document.getElementsByClassName("input");
+  let val = document.getElementsByClassName("input"+inp);
   inputs=[]
   let totalSpending=0;
   for(let i=0; i<val.length;i++){
@@ -20,75 +23,11 @@ function submit(){
   if(valid_responses==true){
     remainingMoney=inputs[0]-totalSpending;
     google.charts.load('current', {'packages':['corechart']});
-    google.charts.setOnLoadCallback(drawChart);
-    //  var ctx=document.getElementById("mycanvas").getContext("2d");
-    //  var data=[
-    //      {
-    //          value: inputs[0],
-    //          color: "cornflowerblue",
-    //          highlight: "lightskyblue",
-    //          label: "Housing(%)"
-    //      },
-    //      {
-    //          value: inputs[1],
-    //          color: "lightgreen",
-    //          highlight: "yellowgreen",
-    //          label: "Transportation(%)"
-    //      },
-    //      {
-    //          value: inputs[2],
-    //          color: "orange",
-    //          highlight: "darkorange",
-    //          label: "Food(%)"
-    //      },
-    //      {
-    //          value: inputs[3],
-    //          color: "red",
-    //          highlight: "blue",
-    //          label: "Personal insurance and pension(%)"
-    //      },
-    //      {
-    //          value: inputs[4],
-    //          color: "blue",
-    //          highlight: "green",
-    //          label: "Healthcare(%)"
-    //      },
-    //      {
-    //          value: inputs[5],
-    //          color: "green",
-    //          highlight: "yellow",
-    //          label: "Entertainment(%)"
-    //      },
-    //      {
-    //          value: inputs[6],
-    //          color: "yellow",
-    //          highlight: "orange",
-    //          label: "Other Expenses(%)"
-    //      },
-    //      {
-    //          value: inputs[7],
-    //          color: "orange",
-    //          highlight: "red",
-    //          label: "Cash Contributions(%)"
-    //      },
-    //      {
-    //          value: inputs[8],
-    //          color: "purple",
-    //          highlight: "yellow",
-    //          label: "Apparel and Services(%)"
-    //      },
-    //      {
-    //          value: inputs[9],
-    //          color: "brown",
-    //          highlight: "green",
-    //          label: "Education(%)"
-    //      },
-    //  ]
-    //  var piechart=new Chart(ctx).Pie(data);
+    google.charts.setOnLoadCallback(drawChart(inp));
   }
 }
 
-function drawChart() {
+function drawChart(piechartNumber) {
   var data = google.visualization.arrayToDataTable([
   ['Expenditure', 'Dollars'],
   ['Housing', inputs[1]],
@@ -102,15 +41,72 @@ function drawChart() {
   ['Apparel and Services', inputs[9]],
   ['Education', inputs[10]]
 ]);
-
-  // Optional; add a title and set the width and height of the chart
-  var options = {'title':'Piechart of Expenditure', 'width':550, 'height':400};
-
-  // Display the chart inside the <div> element with id="piechart"
-  var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+  let months=['January', 'Febuary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  let title="Piechart of Expenditure for "+months[parseInt(piechartNumber)-1]+" "+document.getElementById("year").value;
+  var options = {'title':title, 'width':550, 'height':400};
+  var chart = new google.visualization.PieChart(document.getElementById('piechart'+piechartNumber));
   chart.draw(data, options);
 
-  document.getElementById("remainingAmount").innerHTML="Leftover Money: $"+remainingMoney.toFixed(2);
+  document.getElementById("remainingAmount"+piechartNumber).innerHTML="Leftover Money: $"+remainingMoney.toFixed(2);
 }
 
+function printPageArea(areaID){
+    var printContent = document.getElementById(areaID);
+    var WinPrint = window.open('', '', 'width=900,height=650');
+    WinPrint.document.write(printContent.innerHTML);
+    WinPrint.document.close();
+    WinPrint.focus();
+    WinPrint.print();
+    WinPrint.close();
+}
 
+function yearly_submit(){
+  let valid_responses=true;
+  let totals=[0,0,0,0,0,0,0,0,0,0,0];
+  let expenditures=["monthlyIncome","housing", "transportation", "food", "personalInsurance","healthcare","entertainment", "expenses", "contributions", "services", "education"]
+  for (let i=0; i<expenditures.length; i++){
+      let total=0;
+      let numbers=document.getElementsByClassName(expenditures[i]);
+      for(let number=0; number<numbers.length; number++){
+            if (Number.isNaN(number)){
+                alert("Invalid Inputs!");
+                valid_responses=false;
+                break;
+            }
+            totals[i]+=parseFloat(numbers[number].value); 
+            //console.log(totals[i]);
+       }
+}
+   if(valid_responses==true){
+    let totalExpenditure=0;
+    for(let i=1;i<totals.length;i++){
+        totalExpenditure+=totals[i];
+    }
+   // console.log(totals[0]);
+    totalRemainingMoney=totals[0]-totalExpenditure;
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(yearlyDrawChart());
+}
+
+function yearlyDrawChart() {
+  var data = google.visualization.arrayToDataTable([
+  ['Expenditure', 'Dollars'],
+  ['Housing', totals[1]],
+  ['Transportation', totals[2]],
+  ['Food', totals[3]],
+  ['Personal insurance and pension', totals[4]],
+  ['Healthcare', totals[5]],
+  ['Entertainment', totals[6]],
+  ['Other Expenses', totals[7]],
+  ['Cash Contribution', totals[8]],
+  ['Apparel and Services', totals[9]],
+  ['Education', totals[10]]
+]);
+  let title="Piechart of Total Expenditure for "+document.getElementById("year").value;
+  var options = {'title':title, 'width':550, 'height':400};
+  var chart = new google.visualization.PieChart(document.getElementById('yearlyPie'));
+  chart.draw(data, options);
+
+  document.getElementById("yearlyRemainingAmount").innerHTML="Leftover Money: $"+totalRemainingMoney.toFixed(2);
+}
+}
